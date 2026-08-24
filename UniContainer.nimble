@@ -33,15 +33,19 @@ task docs, "API reference + book into pages/ — what CI publishes":
 
 task test, "Nim tests (debug, contracts active)":
   exec "nim c -r --path:src -o:build/test_isobmff tests/test_isobmff.nim"
+  exec "nim c -r --path:src -o:build/test_mp4 tests/test_mp4.nim"
 
 task testRelease, "Nim tests (release, contracts compiled away)":
   exec "nim c -r -d:release --path:src -o:build/test_isobmff_rel tests/test_isobmff.nim"
+  exec "nim c -r -d:release --path:src -o:build/test_mp4_rel tests/test_mp4.nim"
 
 task testCi, "Nim tests (CI subset, debug)":
   exec "nim c -r --path:src -o:build/test_isobmff tests/test_isobmff.nim"
+  exec "nim c -r --path:src -o:build/test_mp4 tests/test_mp4.nim"
 
 task testCiRelease, "Nim tests (CI subset, release)":
   exec "nim c -r -d:release --path:src -o:build/test_isobmff_rel tests/test_isobmff.nim"
+  exec "nim c -r -d:release --path:src -o:build/test_mp4_rel tests/test_mp4.nim"
 
 task testAll, "debug + release + C ABI":
   exec "nimble test"
@@ -126,6 +130,10 @@ task coverage, "LCOV + HTML coverage report for the Nim sources (needs lcov)":
        " --debugger:native --passC:--coverage --passL:--coverage" &
        " -o:build/test_coverage tests/test_isobmff.nim"
   exec "./build/test_coverage"
+  exec "nim c --path:src --nimcache:" & cache &
+       " --debugger:native --passC:--coverage --passL:--coverage" &
+       " -o:build/test_coverage_mp4 tests/test_mp4.nim"
+  exec "./build/test_coverage_mp4"
   exec "lcov --capture --directory " & cache & " --base-directory ." &
        " --include \"*/src/UniContainer/*\" --output-file lcov.info --quiet"
   exec "genhtml lcov.info --output-directory coverage --legend --quiet"
