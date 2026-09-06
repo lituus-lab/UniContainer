@@ -644,7 +644,13 @@ proc newFragmentedMp4Writer*(path: string; tracks: openArray[TrackParams]):
     let stream = openFileStream(path, fmWrite)
     if stream == nil:
       raise newException(IOError, "mp4: cannot write " & path)
-    result = newFragmentedMp4Writer(stream, tracks)
+    try:
+      result = newFragmentedMp4Writer(stream, tracks)
+    except CatchableError:
+      # Same as the plain writer above: the stream is open, no writer took
+      # ownership, and Windows refuses to remove a file another handle holds.
+      stream.close()
+      raise
     result.ownsStream = true
 
 proc writeSample*(writer: var FragmentedMp4Writer; track: int;
