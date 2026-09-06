@@ -137,7 +137,10 @@ suite "a refused file writer leaves nothing behind":
   # removes an open file happily, which is why this only ever failed on
   # Windows -- there the leaked handle makes the file undeletable.
   test "a rejected track list still lets the file be removed":
-    let target = getTempDir() / "unicontainer-refused.mp4"
+    # The pid keeps two test binaries -- debug and release run back to back --
+    # from removing each other's file under the same name.
+    let target = getTempDir() / ("unicontainer-refused-" &
+                                 $getCurrentProcessId() & ".mp4")
     removeFile target
     expect ContainerError:
       discard newMp4Writer(target, [TrackParams(kind: tkVideo, codec: "avc1",
