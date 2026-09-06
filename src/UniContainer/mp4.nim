@@ -197,7 +197,15 @@ proc newMp4Writer*(path: string; tracks: openArray[TrackParams]): Mp4Writer
     let stream = openFileStream(path, fmWrite)
     if stream == nil:
       raise newException(IOError, "mp4: cannot write " & path)
-    result = newMp4Writer(stream, tracks)
+    try:
+      result = newMp4Writer(stream, tracks)
+    except CatchableError:
+      # The stream is open and no writer took ownership of it, so this is the
+      # only place it can be closed. Windows refuses to remove a file another
+      # handle still holds, which turns a correctly rejected track list into a
+      # file the caller cannot delete.
+      stream.close()
+      raise
     result.ownsStream = true
 
 proc writeSample*(writer: var Mp4Writer; track: int; data: openArray[byte];
