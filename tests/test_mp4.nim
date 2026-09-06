@@ -136,6 +136,17 @@ suite "a refused file writer leaves nothing behind":
   # tracks, so a rejected track list used to leave the handle open. POSIX
   # removes an open file happily, which is why this only ever failed on
   # Windows -- there the leaked handle makes the file undeletable.
+  test "a rejected track list still lets the fragmented file be removed":
+    let target = getTempDir() / ("unicontainer-refused-frag-" &
+                                 $getCurrentProcessId() & ".mp4")
+    removeFile target
+    expect ContainerError:
+      discard newFragmentedMp4Writer(target, [TrackParams(kind: tkVideo,
+        codec: "avc1", timescale: 1000, width: 0, height: 16)])
+    check fileExists(target)
+    removeFile target
+    check not fileExists(target)
+
   test "a rejected track list still lets the file be removed":
     # The pid keeps two test binaries -- debug and release run back to back --
     # from removing each other's file under the same name.
