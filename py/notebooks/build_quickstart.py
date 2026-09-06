@@ -17,7 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT = os.path.join(HERE, "quickstart.ipynb")
 
 CELLS = [
-    ('md', '# UniContainer — Python quickstart\n\n`unicontainer` is a Cython extension over the UniContainer C ABI, shipped as a\nself-contained wheel: the native library travels inside the package, so\ninstalling it needs neither Nim nor a compiler.\n\n```\npip install unicontainer\n```\n\nCI executes this notebook against the wheel the release actually publishes, so\nthe outputs below are what the code produced, not what it was expected to.'),
+    ('md', '# UniContainer — Python quickstart\n\n`unicontainer` is a Cython extension over the UniContainer C ABI, shipped as a\nself-contained wheel: the native library travels inside the package, so\ninstalling it needs neither Nim nor a compiler.\n\n```\npip install lituus-unicontainer\n```\n\nCI executes this notebook against the wheel the release actually publishes, so\nthe outputs below are what the code produced, not what it was expected to.'),
     ('md', '## A box is a length, a kind and a payload\n\nMP4, MOV, HEIF, AVIF and an ALAC `.m4a` are the same structure. This library\nwalks that structure and hands over spans; it never decodes what is inside one.'),
     ('code', 'def box(kind, payload=b""):\n    size = len(payload) + 8\n    return size.to_bytes(4, "big") + kind.encode("ascii") + payload\n\ndata = box("ftyp", b"isom") + box("moov", box("trak", box("mdia", b"the payload")))\nlen(data)'),
     ('md', '## Recognising the format, and reaching a box by name'),
