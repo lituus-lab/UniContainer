@@ -6,7 +6,7 @@
 ## an ISO base media file needs are present, in the right nesting, carrying the
 ## bytes they were handed. Whether those bytes decode is the consumer's
 ## question, and the consumer's test.
-import std/[unittest, streams]
+import std/[unittest, streams, os]
 import UniContainer
 
 proc bytesOf(text: string): seq[byte] =
@@ -131,3 +131,17 @@ suite "writing a fragment at a time":
     check writer.fragmentCount == 0
     writer.close()
 
+suite "a refused file writer leaves nothing behind":
+  # The path constructor opens the file before the shared body validates the
+  # tracks, so a rejected track list used to leave the handle open. POSIX
+  # removes an open file happily, which is why this only ever failed on
+  # Windows -- there the leaked handle makes the file undeletable.
+  test "a rejected track list still lets the file be removed":
+    let target = getTempDir() / "unicontainer-refused.mp4"
+    removeFile target
+    expect ContainerError:
+      discard newMp4Writer(target, [TrackParams(kind: tkVideo, codec: "avc1",
+        timescale: 1000, width: 0, height: 16)])
+    check fileExists(target)
+    removeFile target
+    check not fileExists(target)
